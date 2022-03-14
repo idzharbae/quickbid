@@ -1,0 +1,19 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:11.3
+    environment:
+      POSTGRES_USER: quickbid
+      POSTGRES_PASSWORD: quickbid
+      POSTGRES_DB: quickbid
+    ports:
+      - 5432:5432
+  quickbid:
+    depends_on:
+      - postgres
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 8000:8000
+      

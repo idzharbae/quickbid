@@ -1,0 +1,9 @@
+{
+    "database": {
+        "address": "postgres",
+        "port": 5432,
+        "username": "quickbid",
+        "password": "quickbid",
+        "db_name": "quickbid"
+    }
+}
