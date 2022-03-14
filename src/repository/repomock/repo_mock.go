@@ -5,6 +5,7 @@
 package repomock
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/idzharbae/quickbid/src/entity"
 	reflect "reflect"
@@ -33,19 +34,19 @@ func (m *MockAttendanceReaderRepo) EXPECT() *MockAttendanceReaderRepoMockRecorde
 	return m.recorder
 }
 
-// GetByID mocks base method
-func (m *MockAttendanceReaderRepo) GetByID(id int) (entity.Attendance, error) {
+// GetByName mocks base method
+func (m *MockAttendanceReaderRepo) GetByName(ctx context.Context, name string) (entity.Attendance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByID", id)
+	ret := m.ctrl.Call(m, "GetByName", ctx, name)
 	ret0, _ := ret[0].(entity.Attendance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetByID indicates an expected call of GetByID
-func (mr *MockAttendanceReaderRepoMockRecorder) GetByID(id interface{}) *gomock.Call {
+// GetByName indicates an expected call of GetByName
+func (mr *MockAttendanceReaderRepoMockRecorder) GetByName(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockAttendanceReaderRepo)(nil).GetByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockAttendanceReaderRepo)(nil).GetByName), ctx, name)
 }
 
 // MockAttendanceWriterRepo is a mock of AttendanceWriterRepo interface
@@ -72,15 +73,15 @@ func (m *MockAttendanceWriterRepo) EXPECT() *MockAttendanceWriterRepoMockRecorde
 }
 
 // Insert mocks base method
-func (m *MockAttendanceWriterRepo) Insert(attendance entity.Attendance) error {
+func (m *MockAttendanceWriterRepo) Insert(ctx context.Context, attendance entity.Attendance) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Insert", attendance)
+	ret := m.ctrl.Call(m, "Insert", ctx, attendance)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Insert indicates an expected call of Insert
-func (mr *MockAttendanceWriterRepoMockRecorder) Insert(attendance interface{}) *gomock.Call {
+func (mr *MockAttendanceWriterRepoMockRecorder) Insert(ctx, attendance interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockAttendanceWriterRepo)(nil).Insert), attendance)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockAttendanceWriterRepo)(nil).Insert), ctx, attendance)
 }

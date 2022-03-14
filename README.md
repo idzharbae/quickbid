@@ -14,3 +14,6 @@
 
 ## Stop app
 `docker-compose stop`
+
+## Generate mock
+`go generate ./...`
