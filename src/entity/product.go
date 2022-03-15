@@ -14,3 +14,8 @@ type Product struct {
 	Status       int
 	BidIncrement int
 }
+
+type ProductWithSeller struct {
+	Product
+	Seller User
+}

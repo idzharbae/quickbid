@@ -2,27 +2,36 @@ package types
 
 import "github.com/idzharbae/quickbid/src/entity"
 
-type Bid struct {
-	Amount  int     `json:"amount"`
-	Status  string  `json:"status"`
-	Product Product `json:"product"`
+type ListBidResponse struct {
+	Bids []Bid `json:"bids"`
 }
 
-func BidResponseFromEntity(bid entity.Bid) Bid {
+type Bid struct {
+	Amount  int        `json:"amount"`
+	Status  string     `json:"status"`
+	Product BidProduct `json:"product"`
+}
+
+type BidProduct struct {
+	Name     string `json:"name"`
+	ImageURL string `json:"image_url"`
+}
+
+func BidFromEntity(bid entity.BidWithProduct) Bid {
 	return Bid{
 		Amount: bid.Amount,
 		Status: bidsStatusToString(bid.Status),
-		Product: Product{
+		Product: BidProduct{
 			Name:     bid.Product.Name,
 			ImageURL: bid.Product.ImageURL,
 		},
 	}
 }
 
-func BidsRepsonseFromEntity(bids []entity.Bid) []Bid {
-	var res []Bid
+func ListBidResponseFromEntity(bids []entity.BidWithProduct) ListBidResponse {
+	var res ListBidResponse
 	for _, bid := range bids {
-		res = append(res, BidResponseFromEntity(bid))
+		res.Bids = append(res.Bids, BidFromEntity(bid))
 	}
 	return res
 }

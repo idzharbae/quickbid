@@ -18,7 +18,7 @@ func NewBidUC(bidReader src.BidReaderRepo) src.BidUC {
 	return &bidUC{bidReader: bidReader}
 }
 
-func (b *bidUC) ListUserBiddedProducts(ctx context.Context, req requests.ListUserBiddedProductsRequest) ([]entity.Bid, error) {
+func (b *bidUC) ListUserBiddedProducts(ctx context.Context, req requests.ListUserBiddedProductsRequest) ([]entity.BidWithProduct, error) {
 	bids, err := b.bidReader.ListUserBiddedProducts(ctx, req.UserID, req.Page, req.Limit)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "[bidUC][ListUserBiddedProducts]")

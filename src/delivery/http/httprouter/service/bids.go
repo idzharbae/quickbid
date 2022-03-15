@@ -61,7 +61,7 @@ func (bs *BidService) ListUserBidsHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	bidsResponse := types.BidsRepsonseFromEntity(bids)
+	bidsResponse := types.ListBidResponseFromEntity(bids)
 	bidsResponseJson, err := json.Marshal(bidsResponse)
 	if err != nil {
 		log.Println(err)
