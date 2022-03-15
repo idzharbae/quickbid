@@ -12,9 +12,15 @@ import (
 func NewHandler(quickbidApp *app.QuickBid) http.Handler {
 	router := httprouter.New()
 
-	attendanceService := service.NewAttendanceService(quickbidApp.UseCases.AttendanceUC)
-	for _, handle := range attendanceService.GetHandles() {
-		router.Handle(handle.Method, handle.Path, handle.Handle)
+	services := []service.HttpService{
+		service.NewBidService(quickbidApp.UseCases.BidUC),
+		service.NewAttendanceService(quickbidApp.UseCases.AttendanceUC),
+	}
+
+	for _, service := range services {
+		for _, handle := range service.GetHandles() {
+			router.Handle(handle.Method, handle.Path, handle.Handle)
+		}
 	}
 
 	return router

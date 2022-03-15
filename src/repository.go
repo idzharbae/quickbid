@@ -20,3 +20,9 @@ type AttendanceWriterRepo interface {
 
 	WithTx(db.Tx) AttendanceWriterRepo
 }
+
+type BidReaderRepo interface {
+	ListUserBiddedProducts(ctx context.Context, userID int, page int, limit int) ([]entity.Bid, error)
+
+	WithTx(db.Tx) BidReaderRepo
+}

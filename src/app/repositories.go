@@ -10,6 +10,7 @@ import (
 type Repositories struct {
 	AttendanceWriter src.AttendanceWriterRepo
 	AttendanceReader src.AttendanceReaderRepo
+	BidReader        src.BidReaderRepo
 }
 
 func newRepositories(pgxPool *pgxpool.Pool) *Repositories {
@@ -18,5 +19,6 @@ func newRepositories(pgxPool *pgxpool.Pool) *Repositories {
 	return &Repositories{
 		AttendanceWriter: repopg.NewAttendanceWriter(pgxDriver),
 		AttendanceReader: repopg.NewAttendanceReader(pgxDriver),
+		BidReader:        repopg.NewBidReader(pgxDriver),
 	}
 }

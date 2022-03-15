@@ -115,3 +115,55 @@ func (mr *MockAttendanceWriterRepoMockRecorder) WithTx(arg0 interface{}) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTx", reflect.TypeOf((*MockAttendanceWriterRepo)(nil).WithTx), arg0)
 }
+
+// MockBidReaderRepo is a mock of BidReaderRepo interface
+type MockBidReaderRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockBidReaderRepoMockRecorder
+}
+
+// MockBidReaderRepoMockRecorder is the mock recorder for MockBidReaderRepo
+type MockBidReaderRepoMockRecorder struct {
+	mock *MockBidReaderRepo
+}
+
+// NewMockBidReaderRepo creates a new mock instance
+func NewMockBidReaderRepo(ctrl *gomock.Controller) *MockBidReaderRepo {
+	mock := &MockBidReaderRepo{ctrl: ctrl}
+	mock.recorder = &MockBidReaderRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockBidReaderRepo) EXPECT() *MockBidReaderRepoMockRecorder {
+	return m.recorder
+}
+
+// ListUserBiddedProducts mocks base method
+func (m *MockBidReaderRepo) ListUserBiddedProducts(ctx context.Context, userID, page, limit int) ([]entity.Bid, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUserBiddedProducts", ctx, userID, page, limit)
+	ret0, _ := ret[0].([]entity.Bid)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUserBiddedProducts indicates an expected call of ListUserBiddedProducts
+func (mr *MockBidReaderRepoMockRecorder) ListUserBiddedProducts(ctx, userID, page, limit interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUserBiddedProducts", reflect.TypeOf((*MockBidReaderRepo)(nil).ListUserBiddedProducts), ctx, userID, page, limit)
+}
+
+// WithTx mocks base method
+func (m *MockBidReaderRepo) WithTx(arg0 db.Tx) src.BidReaderRepo {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithTx", arg0)
+	ret0, _ := ret[0].(src.BidReaderRepo)
+	return ret0
+}
+
+// WithTx indicates an expected call of WithTx
+func (mr *MockBidReaderRepoMockRecorder) WithTx(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTx", reflect.TypeOf((*MockBidReaderRepo)(nil).WithTx), arg0)
+}

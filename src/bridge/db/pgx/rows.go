@@ -16,5 +16,9 @@ func (r *Rows) Next() bool {
 	return r.rows.Next()
 }
 func (r *Rows) Scan(dest ...interface{}) error {
-	return r.rows.Scan()
+	return r.rows.Scan(dest...)
+}
+
+func (r *Rows) RowsAffected() int64 {
+	return r.rows.CommandTag().RowsAffected()
 }

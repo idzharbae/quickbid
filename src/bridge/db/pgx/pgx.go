@@ -8,8 +8,6 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-//go:generate mockgen -destination=pgxmock/pgx_mock.go -package=pgxmock -source=pgxinterface.go
-
 type PgxDriver struct {
 	pool *pgxpool.Pool
 }
