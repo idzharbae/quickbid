@@ -15,6 +15,7 @@ func NewHandler(quickbidApp *app.QuickBid) http.Handler {
 	services := []service.HttpService{
 		service.NewBidService(quickbidApp.UseCases.BidUC),
 		service.NewAttendanceService(quickbidApp.UseCases.AttendanceUC),
+		service.NewProductService(quickbidApp.UseCases.ProductUC),
 	}
 
 	for _, service := range services {

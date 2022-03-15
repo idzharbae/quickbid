@@ -15,5 +15,9 @@ type AttendanceUC interface {
 }
 
 type BidUC interface {
-	ListUserBiddedProducts(ctx context.Context, req requests.ListUserBiddedProductsRequest) ([]entity.Bid, error)
+	ListUserBiddedProducts(ctx context.Context, req requests.ListUserBiddedProductsRequest) ([]entity.BidWithProduct, error)
+}
+
+type ProductUC interface {
+	GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error)
 }

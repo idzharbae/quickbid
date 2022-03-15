@@ -17,11 +17,11 @@ func NewBidReader(dbConn db.Connection) src.BidReaderRepo {
 	return &bidReader{dbConn: dbConn}
 }
 
-func (br *bidReader) ListUserBiddedProducts(ctx context.Context, userID int, page int, limit int) ([]entity.Bid, error) {
+func (br *bidReader) ListUserBiddedProducts(ctx context.Context, userID int, page int, limit int) ([]entity.BidWithProduct, error) {
 	offset := page * limit
 
 	rows, err := br.dbConn.Query(ctx,
-		`SELECT b.id, b.user_id, b.amount, 
+		`SELECT b.id, b.user_id, b.amount, b.status,
 			p.id, p.name, p.image_url, p.initial_price, p.bid_increment, p.owner_user_id, p.start_bid_date, p.end_bid_date
 			FROM bid b JOIN products p ON b.product_id = p.id 
 			WHERE b.user_id = $1 
@@ -34,11 +34,11 @@ func (br *bidReader) ListUserBiddedProducts(ctx context.Context, userID int, pag
 
 	defer rows.Close()
 
-	result := make([]entity.Bid, 0, rows.RowsAffected())
+	result := make([]entity.BidWithProduct, 0, rows.RowsAffected())
 
 	for rows.Next() {
-		var bid entity.Bid
-		err := rows.Scan(&bid.ID, &bid.UserID, &bid.Amount,
+		var bid entity.BidWithProduct
+		err := rows.Scan(&bid.ID, &bid.UserID, &bid.Amount, &bid.Status,
 			&bid.Product.ID, &bid.Product.Name, &bid.Product.ImageURL, &bid.Product.InitialPrice, &bid.Product.BidIncrement, &bid.Product.OwnerUserID, &bid.Product.StartBidDate, &bid.Product.EndBidDate)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "[ListUserBiddedProducts][bidReader]")
