@@ -17,3 +17,13 @@
 
 ## Generate mock
 `go generate ./...`
+
+## Code Arch
+Based on Clean Architecture 
+- Entity: Business objects
+- UseCase: Business logics
+- Repository: Data & resource management
+- Bridge: Abstraction of libraries
+
+- App: Connects layers
+- Delivery: Delivery layer (eg HTTP/GRPC/Cron)

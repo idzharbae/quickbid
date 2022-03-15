@@ -3,8 +3,13 @@ package config
 import "fmt"
 
 type Config struct {
+	App              App      `json:"app"`
 	DB               Database `json:"database"`
 	ConnectionString string   `json:"connection_string"`
+}
+
+type App struct {
+	Port int `json:"port"`
 }
 
 type Database struct {

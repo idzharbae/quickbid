@@ -1,4 +1,7 @@
 {
+    "app": {
+        "port": 8000
+    },
     "database": {
         "address": "postgres",
         "port": 5432,
