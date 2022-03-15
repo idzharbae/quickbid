@@ -3,19 +3,24 @@ package repopg
 import (
 	"context"
 
+	"github.com/idzharbae/quickbid/src"
+	"github.com/idzharbae/quickbid/src/bridge/db"
 	"github.com/idzharbae/quickbid/src/entity"
-	"github.com/idzharbae/quickbid/src/repository/repopg/pgx"
 )
 
 type attendanceWriter struct {
-	pgx pgx.Pgx
+	dbConn db.Connection
 }
 
-func NewAttendanceWriter(pgDriver pgx.Pgx) *attendanceWriter {
-	return &attendanceWriter{pgx: pgDriver}
+func NewAttendanceWriter(dbConn db.Connection) src.AttendanceWriterRepo {
+	return &attendanceWriter{dbConn: dbConn}
 }
 
 func (at *attendanceWriter) Insert(ctx context.Context, req entity.Attendance) error {
-	_, err := at.pgx.Exec(ctx, "INSERT INTO attendance(name, attendance_time) VALUES($1, $2)", req.Name, req.AttendanceTime)
+	_, err := at.dbConn.Exec(ctx, "INSERT INTO attendance(name, attendance_time) VALUES($1, $2)", req.Name, req.AttendanceTime)
 	return err
+}
+
+func (at *attendanceWriter) WithTx(tx db.Tx) src.AttendanceWriterRepo {
+	return NewAttendanceWriter(tx)
 }

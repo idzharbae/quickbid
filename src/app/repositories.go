@@ -1,12 +1,10 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/idzharbae/quickbid/src"
-	"github.com/idzharbae/quickbid/src/app/config"
+	"github.com/idzharbae/quickbid/src/bridge/db/pgx"
 	"github.com/idzharbae/quickbid/src/repository/repopg"
-	"github.com/idzharbae/quickbid/src/repository/repopg/pgx/pgxdriver"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Repositories struct {
@@ -14,11 +12,11 @@ type Repositories struct {
 	AttendanceReader src.AttendanceReaderRepo
 }
 
-func newRepositories(cfg config.Config) *Repositories {
-	pgDriver := pgxdriver.NewPgxDriver(fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Address, cfg.DB.Port, cfg.DB.DBName))
+func newRepositories(pgxPool *pgxpool.Pool) *Repositories {
+	pgxDriver := pgx.NewPgxDriver(pgxPool)
 
 	return &Repositories{
-		AttendanceWriter: repopg.NewAttendanceWriter(pgDriver),
-		AttendanceReader: repopg.NewAttendanceReader(pgDriver),
+		AttendanceWriter: repopg.NewAttendanceWriter(pgxDriver),
+		AttendanceReader: repopg.NewAttendanceReader(pgxDriver),
 	}
 }

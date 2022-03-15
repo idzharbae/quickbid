@@ -3,6 +3,7 @@ package src
 import (
 	"context"
 
+	"github.com/idzharbae/quickbid/src/bridge/db"
 	"github.com/idzharbae/quickbid/src/entity"
 )
 
@@ -10,8 +11,12 @@ import (
 
 type AttendanceReaderRepo interface {
 	GetByName(ctx context.Context, name string) (entity.Attendance, error)
+
+	WithTx(db.Tx) AttendanceReaderRepo
 }
 
 type AttendanceWriterRepo interface {
 	Insert(ctx context.Context, attendance entity.Attendance) error
+
+	WithTx(db.Tx) AttendanceWriterRepo
 }

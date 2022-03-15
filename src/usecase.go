@@ -6,4 +6,5 @@ import "context"
 
 type AttendanceUC interface {
 	Attend(ctx context.Context, name string) error
+	AttendBulk(ctx context.Context, names []string) error
 }

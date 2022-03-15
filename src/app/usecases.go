@@ -9,8 +9,8 @@ type UseCases struct {
 	AttendanceUC src.AttendanceUC
 }
 
-func newUseCases(repos *Repositories) *UseCases {
+func newUseCases(repos *Repositories, bridges *Bridges) *UseCases {
 	return &UseCases{
-		AttendanceUC: ucv1.NewAttendanceV1(repos.AttendanceWriter, repos.AttendanceReader),
+		AttendanceUC: ucv1.NewAttendanceV1(repos.AttendanceWriter, repos.AttendanceReader, bridges.transactioner),
 	}
 }

@@ -7,6 +7,8 @@ package repomock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	src "github.com/idzharbae/quickbid/src"
+	db "github.com/idzharbae/quickbid/src/bridge/db"
 	entity "github.com/idzharbae/quickbid/src/entity"
 	reflect "reflect"
 )
@@ -49,6 +51,20 @@ func (mr *MockAttendanceReaderRepoMockRecorder) GetByName(ctx, name interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockAttendanceReaderRepo)(nil).GetByName), ctx, name)
 }
 
+// WithTx mocks base method
+func (m *MockAttendanceReaderRepo) WithTx(arg0 db.Tx) src.AttendanceReaderRepo {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithTx", arg0)
+	ret0, _ := ret[0].(src.AttendanceReaderRepo)
+	return ret0
+}
+
+// WithTx indicates an expected call of WithTx
+func (mr *MockAttendanceReaderRepoMockRecorder) WithTx(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTx", reflect.TypeOf((*MockAttendanceReaderRepo)(nil).WithTx), arg0)
+}
+
 // MockAttendanceWriterRepo is a mock of AttendanceWriterRepo interface
 type MockAttendanceWriterRepo struct {
 	ctrl     *gomock.Controller
@@ -84,4 +100,18 @@ func (m *MockAttendanceWriterRepo) Insert(ctx context.Context, attendance entity
 func (mr *MockAttendanceWriterRepoMockRecorder) Insert(ctx, attendance interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockAttendanceWriterRepo)(nil).Insert), ctx, attendance)
+}
+
+// WithTx mocks base method
+func (m *MockAttendanceWriterRepo) WithTx(arg0 db.Tx) src.AttendanceWriterRepo {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithTx", arg0)
+	ret0, _ := ret[0].(src.AttendanceWriterRepo)
+	return ret0
+}
+
+// WithTx indicates an expected call of WithTx
+func (mr *MockAttendanceWriterRepoMockRecorder) WithTx(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTx", reflect.TypeOf((*MockAttendanceWriterRepo)(nil).WithTx), arg0)
 }

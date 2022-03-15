@@ -46,3 +46,17 @@ func (mr *MockAttendanceUCMockRecorder) Attend(ctx, name interface{}) *gomock.Ca
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Attend", reflect.TypeOf((*MockAttendanceUC)(nil).Attend), ctx, name)
 }
+
+// AttendBulk mocks base method
+func (m *MockAttendanceUC) AttendBulk(ctx context.Context, names []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AttendBulk", ctx, names)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AttendBulk indicates an expected call of AttendBulk
+func (mr *MockAttendanceUCMockRecorder) AttendBulk(ctx, names interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AttendBulk", reflect.TypeOf((*MockAttendanceUC)(nil).AttendBulk), ctx, names)
+}

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/idzharbae/quickbid/src/bridge/transactioner/txnermock"
 	"github.com/idzharbae/quickbid/src/entity"
 	"github.com/idzharbae/quickbid/src/repository/repomock"
 	"github.com/idzharbae/quickbid/src/usecase/ucv1"
@@ -67,10 +68,11 @@ func TestUCV1_Attend(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			attendanceReaderMock := repomock.NewMockAttendanceReaderRepo(ctrl)
 			attendanceWriterMock := repomock.NewMockAttendanceWriterRepo(ctrl)
+			txnerMock := txnermock.NewMockTransactioner(ctrl)
 
 			tC.mock(t, attendanceWriterMock, attendanceReaderMock)
 
-			uc := ucv1.NewAttendanceV1(attendanceWriterMock, attendanceReaderMock)
+			uc := ucv1.NewAttendanceV1(attendanceWriterMock, attendanceReaderMock, txnerMock)
 			err := uc.Attend(context.Background(), tC.args.Name)
 			if !reflect.DeepEqual(err, tC.wantErr) {
 				t.Fatalf("[ucv1][Attend] Want err: %v, got err: %v", tC.wantErr, err)
