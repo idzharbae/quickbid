@@ -12,6 +12,7 @@ type Rows interface {
 	Close() error
 	Next() bool
 	Scan(dest ...interface{}) error
+	RowsAffected() int64
 }
 
 type Row interface {

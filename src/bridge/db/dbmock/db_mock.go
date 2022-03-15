@@ -118,6 +118,20 @@ func (mr *MockRowsMockRecorder) Scan(dest ...interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Scan", reflect.TypeOf((*MockRows)(nil).Scan), dest...)
 }
 
+// RowsAffected mocks base method
+func (m *MockRows) RowsAffected() int64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RowsAffected")
+	ret0, _ := ret[0].(int64)
+	return ret0
+}
+
+// RowsAffected indicates an expected call of RowsAffected
+func (mr *MockRowsMockRecorder) RowsAffected() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RowsAffected", reflect.TypeOf((*MockRows)(nil).RowsAffected))
+}
+
 // MockRow is a mock of Row interface
 type MockRow struct {
 	ctrl     *gomock.Controller
