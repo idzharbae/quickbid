@@ -35,6 +35,35 @@ func (p *productReader) GetByIDWithSeller(ctx context.Context, productID int) (e
 	return res, nil
 }
 
-func (p *productReader) WithTx(tx db.Tx) src.ProductReaderRepo {
+func (at *productReader) GetProductByOwnerUserID(ctx context.Context, ownerUserId int) ([]entity.Product, error) {
+	products := make([]entity.Product, 0)
+	rows, err := at.dbConn.Query(ctx, GetProductByOwnerUserIDQuery, ownerUserId)
+	if err != nil {
+		return []entity.Product{}, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var product entity.Product
+		if err := rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.InitialPrice,
+			&product.StartBidDate,
+			&product.EndBidDate,
+			&product.OwnerUserID,
+			&product.LastBidID,
+			&product.ImageURL,
+			&product.Status,
+			&product.BidIncrement,
+		); err != nil {
+			return []entity.Product{}, err
+		}
+		products = append(products, product)
+	}
+
+	return products, nil
+}
+
+func (at *productReader) WithTx(tx db.Tx) src.ProductReaderRepo {
 	return NewProductReader(tx)
 }

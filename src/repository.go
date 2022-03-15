@@ -27,8 +27,15 @@ type BidReaderRepo interface {
 	WithTx(db.Tx) BidReaderRepo
 }
 
+type ProductWriterRepo interface {
+	InsertProduct(ctx context.Context, product entity.Product) error
+
+	WithTx(db.Tx) ProductWriterRepo
+}
+
 type ProductReaderRepo interface {
 	GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error)
+	GetProductByOwnerUserID(ctx context.Context, ownerUserId int) ([]entity.Product, error)
 
 	WithTx(db.Tx) ProductReaderRepo
 }
