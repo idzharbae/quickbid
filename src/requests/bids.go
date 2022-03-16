@@ -5,3 +5,9 @@ type ListUserBiddedProductsRequest struct {
 	Page   int
 	Limit  int
 }
+
+type ListBidsByProductRequest struct {
+	ProductID int
+	Page      int
+	Limit     int
+}

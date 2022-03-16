@@ -3,6 +3,7 @@ module github.com/idzharbae/quickbid
 go 1.14
 
 require (
+	github.com/ggwhite/go-masker v1.0.6
 	github.com/go-pg/migrations v6.7.3+incompatible
 	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/golang/mock v1.6.0

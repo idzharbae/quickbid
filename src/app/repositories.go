@@ -11,6 +11,7 @@ type Repositories struct {
 	AttendanceWriter src.AttendanceWriterRepo
 	AttendanceReader src.AttendanceReaderRepo
 	BidReader        src.BidReaderRepo
+	BidHistoryReader src.BidHistoryReaderRepo
 	ProductReader    src.ProductReaderRepo
 }
 
@@ -21,6 +22,7 @@ func newRepositories(pgxPool *pgxpool.Pool) *Repositories {
 		AttendanceWriter: repopg.NewAttendanceWriter(pgxDriver),
 		AttendanceReader: repopg.NewAttendanceReader(pgxDriver),
 		BidReader:        repopg.NewBidReader(pgxDriver),
+		BidHistoryReader: repopg.NewBidHistoryReader(pgxDriver),
 		ProductReader:    repopg.NewProductReader(pgxDriver),
 	}
 }

@@ -33,6 +33,12 @@ type ProductWriterRepo interface {
 	WithTx(db.Tx) ProductWriterRepo
 }
 
+type BidHistoryReaderRepo interface {
+	ListByProductID(ctx context.Context, productID int, page int, limit int) ([]entity.BidWithBidder, error)
+
+	WithTx(db.Tx) BidHistoryReaderRepo
+}
+
 type ProductReaderRepo interface {
 	GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error)
 	GetProductByOwnerUserID(ctx context.Context, ownerUserId int) ([]entity.Product, error)

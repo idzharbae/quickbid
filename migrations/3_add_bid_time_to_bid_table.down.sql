@@ -1,0 +1,1 @@
+ALTER TABLE bid DROP COLUMN bid_time timestamp;
