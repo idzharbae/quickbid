@@ -12,6 +12,13 @@ type ListBidsByProductRequest struct {
 	Limit     int
 }
 
+type ListBidsByProductAndStatusRequest struct {
+	ProductID int
+	Page      int
+	Limit     int
+	Status    int
+}
+
 type BidProductRequest struct {
 	UserID    int
 	ProductID int

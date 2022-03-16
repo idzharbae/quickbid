@@ -25,6 +25,6 @@ func newUseCases(repos *Repositories, bridges *Bridges) *UseCases {
 			repos.WalletWriter,
 			bridges.transactioner,
 		),
-		ProductUC: ucv1.NewProductUC(repos.ProductReader),
+		ProductUC: ucv1.NewProductUC(repos.ProductReader, repos.ProductWriter),
 	}
 }

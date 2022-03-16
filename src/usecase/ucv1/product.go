@@ -15,8 +15,8 @@ type productUC struct {
 	productReader src.ProductReaderRepo
 }
 
-func NewProductUC(productReader src.ProductReaderRepo) src.ProductUC {
-	return &productUC{productReader: productReader}
+func NewProductUC(productReader src.ProductReaderRepo, productWriter src.ProductWriterRepo) src.ProductUC {
+	return &productUC{productReader: productReader, productWriter: productWriter}
 }
 
 func (p *productUC) GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error) {
@@ -26,6 +26,24 @@ func (p *productUC) GetByIDWithSeller(ctx context.Context, productID int) (entit
 	}
 
 	return product, nil
+}
+
+func (p *productUC) GetFinishedProducts(ctx context.Context, page, limit int) ([]entity.Product, error) {
+	products, err := p.productReader.GetFinishedProducts(ctx, page, limit)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "[productUC][GetFinishedProducts][GetFinishedProducts]")
+	}
+
+	return products, nil
+}
+
+func (p *productUC) SetAsFinished(ctx context.Context, productID int) error {
+	err := p.productWriter.UpdateStatus(ctx, productID, entity.ProductStatusInactive)
+	if err != nil {
+		return stacktrace.Propagate(err, "[productUC][GetFinishedProducts][GetFinishedProducts]")
+	}
+
+	return nil
 }
 
 func (p *productUC) UploadProduct(ctx context.Context, req requests.UploadProductRequest) error {

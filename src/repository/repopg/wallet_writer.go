@@ -20,7 +20,17 @@ func (wr *walletWriter) DeductWallet(ctx context.Context, id, deduction int) err
 	_, err := wr.dbConn.Exec(ctx, `UPDATE wallet SET balance = balance - $1 WHERE id = $2`,
 		deduction, id)
 	if err != nil {
-		return stacktrace.Propagate(err, "[walletReader][GetByUserID][QueryRow]")
+		return stacktrace.Propagate(err, "[walletReader][DeductWallet][QueryRow]")
+	}
+
+	return nil
+}
+
+func (wr *walletWriter) InjectWalletByUserID(ctx context.Context, userID, deduction int) error {
+	_, err := wr.dbConn.Exec(ctx, `UPDATE wallet SET balance = balance + $1 WHERE user_id = $2`,
+		deduction, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "[walletReader][InjectWalletByUserID][QueryRow]")
 	}
 
 	return nil
