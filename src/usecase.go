@@ -20,4 +20,6 @@ type BidUC interface {
 
 type ProductUC interface {
 	GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error)
+	UploadProduct(ctx context.Context, req requests.UploadProductRequest) error
+	GetProductByOwnerUserID(ctx context.Context, req requests.GetProductByOwnerUserIDRequest) ([]entity.Product, error)
 }

@@ -2,6 +2,18 @@ package entity
 
 import "time"
 
+const (
+	ProductStatusActive   = 1
+	ProductStatusInactive = 2
+)
+
+var (
+	statusStringMap = map[int]string{
+		ProductStatusActive:   "active",
+		ProductStatusInactive: "inactive",
+	}
+)
+
 type Product struct {
 	ID           int
 	Name         string

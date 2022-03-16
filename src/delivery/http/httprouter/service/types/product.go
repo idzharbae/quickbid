@@ -27,3 +27,13 @@ func GetProductResponseFromProductAndSellerEntity(product entity.ProductWithSell
 		EndTime:      product.EndBidDate,
 	}
 }
+
+type Product struct {
+	Name         string    `json:"name"`
+	InitialPrice int       `json:"initial_price"`
+	StartBidDate time.Time `json:"start_time"`
+	EndBidDate   time.Time `json:"end_time"`
+	OwnerUserID  int       `json:"seller_id"`
+	ImageURL     string    `json:"image_url"`
+	BidIncrement int       `json:"bid_increment"`
+}
