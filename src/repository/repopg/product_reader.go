@@ -43,6 +43,39 @@ func (p *productReader) GetByIDAndLock(ctx context.Context, productID int) (enti
 	return res, nil
 }
 
+func (p *productReader) GetFinishedProducts(ctx context.Context, page, limit int) ([]entity.Product, error) {
+	products := make([]entity.Product, 0)
+	rows, err := p.dbConn.Query(ctx, `SELECT p.id, p.name, p.initial_price, p.start_bid_date, p.end_bid_date, p.owner_user_id, COALESCE(p.last_bid_id, 0), p.image_url, p.status, p.bid_increment
+					FROM products p
+					WHERE end_bid_date < now() AND status != 2
+					LIMIT $1 OFFSET $2`, limit, page*limit)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "[productReader][GetFinishedProducts]")
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var product entity.Product
+		if err := rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.InitialPrice,
+			&product.StartBidDate,
+			&product.EndBidDate,
+			&product.OwnerUserID,
+			&product.LastBidID,
+			&product.ImageURL,
+			&product.Status,
+			&product.BidIncrement,
+		); err != nil {
+			return []entity.Product{}, err
+		}
+		products = append(products, product)
+	}
+
+	return products, nil
+}
+
 func (p *productReader) GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error) {
 	var res entity.ProductWithSeller
 

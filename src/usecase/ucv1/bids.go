@@ -59,6 +59,15 @@ func (b *bidUC) ListUserBiddedProducts(ctx context.Context, req requests.ListUse
 	return bids, nil
 }
 
+func (b *bidUC) ListByProductAndStatus(ctx context.Context, req requests.ListBidsByProductAndStatusRequest) ([]entity.Bid, error) {
+	bids, err := b.bidReader.ListByProductIDAndStatus(ctx, req.ProductID, req.Status, req.Limit, req.Page)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "[bidUC][ListByProductIDAndStatus]")
+	}
+
+	return bids, nil
+}
+
 func (b *bidUC) ListByProduct(ctx context.Context, req requests.ListBidsByProductRequest) ([]entity.BidWithBidder, error) {
 	bids, err := b.bidHistoryReader.ListByProductID(ctx, req.ProductID, req.Page, req.Limit)
 	if err != nil {
@@ -79,7 +88,6 @@ func (b *bidUC) BidProduct(ctx context.Context, req requests.BidProductRequest) 
 	txnErr := b.txner.DoWithTx(ctx, func(ctx context.Context, tx db.Tx) error {
 		bidReader := b.bidReader.WithTx(tx)
 		bidWriter := b.bidWriter.WithTx(tx)
-		bidHistoryReader := b.bidHistoryReader.WithTx(tx)
 		bidHistoryWriter := b.bidHistoryWriter.WithTx(tx)
 		productReader := b.productReader.WithTx(tx)
 		productWriter := b.productWriter.WithTx(tx)
@@ -130,6 +138,7 @@ func (b *bidUC) BidProduct(ctx context.Context, req requests.BidProductRequest) 
 				UserID:    req.UserID,
 				ProductID: req.ProductID,
 				Amount:    req.Amount,
+				Status:    entity.BidStatusActive,
 				BidTime:   time.Now(),
 			}
 			if bidderLastBidID > 0 {
@@ -160,7 +169,7 @@ func (b *bidUC) BidProduct(ctx context.Context, req requests.BidProductRequest) 
 		}
 
 		if product.LastBidID > 0 {
-			lastBid, err := bidHistoryReader.GetByID(ctx, product.LastBidID)
+			lastBid, err := bidReader.GetByID(ctx, product.LastBidID)
 			if err != nil {
 				return stacktrace.Propagate(err, "[bidUC][BidProduct][bidHistoryReader][GetByID]")
 			}
@@ -190,12 +199,12 @@ func (b *bidUC) BidProduct(ctx context.Context, req requests.BidProductRequest) 
 			return err
 		}
 
-		newBidHistory, err := bidHistoryWriter.Insert(ctx, newBid)
+		_, err = bidHistoryWriter.Insert(ctx, newBid)
 		if err != nil {
 			stacktrace.Propagate(err, "[bidUC][BidProduct][bidHistoryWriter][Insert]")
 		}
 
-		err = productWriter.UpdateLastBidID(ctx, req.ProductID, newBidHistory.ID)
+		err = productWriter.UpdateLastBidID(ctx, req.ProductID, newBid.ID)
 		if err != nil {
 			stacktrace.Propagate(err, "[bidUC][BidProduct][productWriter][UpdateLastBidID]")
 		}
@@ -207,4 +216,72 @@ func (b *bidUC) BidProduct(ctx context.Context, req requests.BidProductRequest) 
 	}
 
 	return newBid, nil
+}
+
+func (b *bidUC) SetAsWinner(ctx context.Context, bidID int) error {
+	bid, err := b.bidReader.GetByIDWithProduct(ctx, bidID)
+	if err != nil {
+		return stacktrace.Propagate(err, "[bidUC][SetAsWinner][GetByID]")
+	}
+
+	txnErr := b.txner.DoWithTx(ctx, func(ctx context.Context, tx db.Tx) error {
+		bidWriter := b.bidWriter.WithTx(tx)
+		walletWriter := b.walletWriter.WithTx(tx)
+
+		err := bidWriter.UpdateStatus(ctx, bid.ID, entity.BidStatusWon)
+		if err != nil {
+			return stacktrace.Propagate(err, "[bidUC][SetAsWinner][UpdateStatus]")
+		}
+
+		err = walletWriter.InjectWalletByUserID(ctx, bid.Product.OwnerUserID, bid.Amount)
+		if err != nil {
+			return stacktrace.Propagate(err, "[bidUC][SetAsWinner][InjectWalletByUserID]")
+		}
+
+		return nil
+	})
+	if txnErr != nil {
+		return stacktrace.Propagate(err, "[bidUC][SetAsWinner][DoWithTx]")
+	}
+
+	return nil
+}
+
+func (b *bidUC) GetByID(ctx context.Context, id int) (entity.Bid, error) {
+	return b.bidReader.GetByID(ctx, id)
+}
+
+func (b *bidUC) SetAsLoserBulk(ctx context.Context, bidIDs []int) error {
+	bids, err := b.bidReader.GetByIDsWithProduct(ctx, bidIDs)
+	if err != nil {
+		return stacktrace.Propagate(err, "[bidUC][SetAsLoserBulk][GetByIDsWithProduct]")
+	}
+
+	for _, bid := range bids {
+		txnErr := b.txner.DoWithTx(ctx, func(ctx context.Context, tx db.Tx) error {
+			bidWriter := b.bidWriter.WithTx(tx)
+			walletWriter := b.walletWriter.WithTx(tx)
+
+			if bid.Status == entity.BidStatusRefunded || bid.Status == entity.BidStatusWon {
+				return nil
+			}
+
+			err := bidWriter.UpdateStatus(ctx, bid.ID, entity.BidStatusRefunded)
+			if err != nil {
+				return stacktrace.Propagate(err, "[bidUC][SetAsLoserBulk][UpdateStatus]")
+			}
+
+			err = walletWriter.InjectWalletByUserID(ctx, bid.UserID, bid.Amount)
+			if err != nil {
+				return stacktrace.Propagate(err, "[bidUC][SetAsLoserBulk][InjectWalletByUserID]")
+			}
+
+			return nil
+		})
+		if txnErr != nil {
+			return stacktrace.Propagate(err, "[bidUC][SetAsLoserBulk][DoWithTx]")
+		}
+	}
+
+	return nil
 }

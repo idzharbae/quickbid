@@ -34,6 +34,15 @@ func (at *productWriter) UpdateLastBidID(ctx context.Context, productID, lastBid
 	return nil
 }
 
+func (pw *productWriter) UpdateStatus(ctx context.Context, productID, status int) error {
+	_, err := pw.dbConn.Exec(ctx, "UPDATE products SET status = $1 WHERE id = $2", status, productID)
+	if err != nil {
+		return stacktrace.Propagate(err, "[productWriter][UpdateStatus][dbConn][Exec]")
+	}
+
+	return nil
+}
+
 func (at *productWriter) WithTx(tx db.Tx) src.ProductWriterRepo {
 	return NewProductWriter(tx)
 }
