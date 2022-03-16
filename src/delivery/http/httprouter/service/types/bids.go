@@ -12,6 +12,12 @@ type ListProductBidsResponse struct {
 	Bids []BidWithBidder `json:"bids"`
 }
 
+type BidProductRequest struct {
+	BidderID  int `json:"user_id"`
+	ProductID int `json:"product_id"`
+	BidAmount int `json:"amount"`
+}
+
 type BidWithProduct struct {
 	Amount  int        `json:"amount"`
 	Status  string     `json:"status"`
