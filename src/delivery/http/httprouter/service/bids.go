@@ -38,7 +38,7 @@ func (bs *BidService) GetHandles() []Handle {
 		{
 			Method: http.MethodPost,
 			Path:   "/api/bids/placebid",
-			Handle: bs.ListProductBidsHandler,
+			Handle: bs.BidProduct,
 		},
 	}
 }
@@ -136,7 +136,7 @@ func (bs *BidService) BidProduct(w http.ResponseWriter, r *http.Request, ps http
 		response.Status = "success"
 		if err != nil {
 			response.Status = "error"
-			response.ErrorMessage = err.Error()
+			response.ErrorMessage = stacktrace.RootCause(err).Error()
 		}
 
 		responseJson, _ := json.Marshal(response)

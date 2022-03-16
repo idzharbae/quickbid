@@ -29,7 +29,7 @@ type BidReaderRepo interface {
 }
 
 type BidWriterRepo interface {
-	Insert(ctx context.Context, bid entity.Bid) error
+	Insert(ctx context.Context, bid entity.Bid) (entity.Bid, error)
 	UpdateAmount(ctx context.Context, bidID, newAmount int) error
 	UpdateStatus(ctx context.Context, bidID, status int) error
 
@@ -44,7 +44,7 @@ type BidHistoryReaderRepo interface {
 }
 
 type BidHistoryWriterRepo interface {
-	Insert(ctx context.Context, bid entity.Bid) error
+	Insert(ctx context.Context, bid entity.Bid) (entity.Bid, error)
 
 	WithTx(db.Tx) BidHistoryWriterRepo
 }

@@ -52,7 +52,7 @@ func (br *bidReader) ListUserBiddedProducts(ctx context.Context, userID int, pag
 
 func (br *bidReader) GetByUserIDAndProductID(ctx context.Context, userID, productID int) (entity.Bid, error) {
 	var res entity.Bid
-	err := br.dbConn.QueryRow(ctx, `SELECT id, user_id, amount, product_id, status, bid_time
+	err := br.dbConn.QueryRow(ctx, `SELECT id, user_id, amount, product_id, status, COALESCE(bid_time, '0001-01-01T00:00:00Z'::timestamp)
 			FROM bid WHERE user_id = $1 AND product_id = $2`, userID, productID).
 		Scan(&res.ID, &res.UserID, &res.Amount, &res.ProductID, &res.Status, &res.BidTime)
 	if err != nil {

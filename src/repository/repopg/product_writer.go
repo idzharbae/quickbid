@@ -6,6 +6,7 @@ import (
 	"github.com/idzharbae/quickbid/src"
 	"github.com/idzharbae/quickbid/src/bridge/db"
 	"github.com/idzharbae/quickbid/src/entity"
+	"github.com/palantir/stacktrace"
 )
 
 type productWriter struct {
@@ -21,6 +22,15 @@ func (at *productWriter) InsertProduct(ctx context.Context, product entity.Produ
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (at *productWriter) UpdateLastBidID(ctx context.Context, productID, lastBidID int) error {
+	_, err := at.dbConn.Exec(ctx, "UPDATE products SET last_bid_id = $1 WHERE id = $2", lastBidID, productID)
+	if err != nil {
+		return stacktrace.Propagate(err, "[productWriter][UpdateLastBidID][dbConn][Exec]")
+	}
+
 	return nil
 }
 

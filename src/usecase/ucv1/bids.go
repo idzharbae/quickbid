@@ -2,6 +2,7 @@ package ucv1
 
 import (
 	"context"
+	"time"
 
 	"github.com/ggwhite/go-masker"
 	"github.com/idzharbae/quickbid/src"
@@ -85,17 +86,77 @@ func (b *bidUC) BidProduct(ctx context.Context, req requests.BidProductRequest) 
 		walletReader := b.walletReader.WithTx(tx)
 		walletWriter := b.walletWriter.WithTx(tx)
 
+		validateRequest := func(req requests.BidProductRequest, product entity.Product) error {
+			now := time.Now()
+			if now.Before(product.StartBidDate) || now.After(product.EndBidDate) {
+				return stacktrace.NewError("can't bid outside product's bidding time range: %v - %v", product.StartBidDate, product.EndBidDate)
+			}
+
+			if req.Amount < product.InitialPrice {
+				return stacktrace.NewError("bid amount is lower than minimum amount")
+			}
+
+			if req.Amount%product.BidIncrement != 0 {
+				return stacktrace.NewError("bid amount is not divisible by bid increment")
+			}
+
+			return nil
+		}
+
+		deductWallet := func(req requests.BidProductRequest, bidderLastBid entity.Bid) error {
+			walletDeduction := req.Amount - bidderLastBid.Amount
+			wallet, err := walletReader.GetByUserID(ctx, req.UserID)
+			if err != nil {
+				return stacktrace.Propagate(err, "[bidUC][BidProduct][walletReader][GetByUserID]")
+			}
+
+			if wallet.Amount < walletDeduction {
+				return stacktrace.NewError("not enough balance")
+			}
+
+			err = walletWriter.DeductWallet(ctx, wallet.ID, walletDeduction)
+			if err != nil {
+				stacktrace.Propagate(err, "[bidUC][BidProduct][walletWriter][DeductWallet]")
+			}
+
+			return nil
+		}
+
+		upsertNewBid := func(req requests.BidProductRequest, bidderLastBidID int) (entity.Bid, error) {
+			var err error
+
+			newBid := entity.Bid{
+				ID:        bidderLastBidID,
+				UserID:    req.UserID,
+				ProductID: req.ProductID,
+				Amount:    req.Amount,
+				BidTime:   time.Now(),
+			}
+			if bidderLastBidID > 0 {
+				err := bidWriter.UpdateAmount(ctx, bidderLastBidID, req.Amount)
+				if err != nil {
+					stacktrace.Propagate(err, "[bidUC][BidProduct][bidWriter][UpdateAmount]")
+				}
+
+				return newBid, nil
+			}
+
+			newBid, err = bidWriter.Insert(ctx, newBid)
+			if err != nil {
+				stacktrace.Propagate(err, "[bidUC][BidProduct][bidWriter][UpdateAmount]")
+			}
+
+			return newBid, nil
+		}
+
 		product, err := productReader.GetByIDAndLock(ctx, req.ProductID)
 		if err != nil {
 			return stacktrace.Propagate(err, "[bidUC][BidProduct][productReader][GetByIDAndLock]")
 		}
 
-		if req.Amount < product.InitialPrice {
-			return stacktrace.NewError("bid amount is lower than minimum amount")
-		}
-
-		if req.Amount%product.BidIncrement != 0 {
-			return stacktrace.NewError("bid amount is not divisible by bid increment")
+		err = validateRequest(req, product)
+		if err != nil {
+			return err
 		}
 
 		if product.LastBidID > 0 {
@@ -115,44 +176,26 @@ func (b *bidUC) BidProduct(ctx context.Context, req requests.BidProductRequest) 
 		}
 
 		bidderLastBid, err := bidReader.GetByUserIDAndProductID(ctx, req.UserID, req.ProductID)
-		if err != nil && err != pgx.ErrNoRows {
+		if err != nil && stacktrace.RootCause(err) != pgx.ErrNoRows {
 			return stacktrace.Propagate(err, "[bidUC][BidProduct][bidReader][GetByUserIDAndProductID]")
 		}
 
-		walletDeduction := req.Amount - bidderLastBid.Amount
-		wallet, err := walletReader.GetByUserID(ctx, req.UserID)
+		err = deductWallet(req, bidderLastBid)
 		if err != nil {
-			return stacktrace.Propagate(err, "[bidUC][BidProduct][walletReader][GetByUserID]")
+			return err
 		}
 
-		if wallet.Amount < walletDeduction {
-			return stacktrace.NewError("not enough balance")
-		}
-
-		err = walletWriter.DeductWallet(ctx, wallet.ID, walletDeduction)
+		newBid, err = upsertNewBid(req, bidderLastBid.ID)
 		if err != nil {
-			stacktrace.Propagate(err, "[bidUC][BidProduct][walletWriter][DeductWallet]")
+			return err
 		}
 
-		newBid = entity.Bid{UserID: req.UserID, ProductID: req.ProductID, Amount: req.Amount}
-		if bidderLastBid.ID > 0 {
-			err := bidWriter.UpdateAmount(ctx, bidderLastBid.ID, req.Amount)
-			if err != nil {
-				stacktrace.Propagate(err, "[bidUC][BidProduct][bidWriter][UpdateAmount]")
-			}
-		} else {
-			err := bidWriter.Insert(ctx, newBid)
-			if err != nil {
-				stacktrace.Propagate(err, "[bidUC][BidProduct][bidWriter][UpdateAmount]")
-			}
-		}
-
-		err = bidHistoryWriter.Insert(ctx, newBid)
+		newBidHistory, err := bidHistoryWriter.Insert(ctx, newBid)
 		if err != nil {
 			stacktrace.Propagate(err, "[bidUC][BidProduct][bidHistoryWriter][Insert]")
 		}
 
-		err = productWriter.UpdateLastBidID(ctx, req.ProductID, newBid.ID)
+		err = productWriter.UpdateLastBidID(ctx, req.ProductID, newBidHistory.ID)
 		if err != nil {
 			stacktrace.Propagate(err, "[bidUC][BidProduct][productWriter][UpdateLastBidID]")
 		}
