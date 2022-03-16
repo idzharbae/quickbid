@@ -10,11 +10,37 @@ import (
 )
 
 type productReader struct {
-	dbConn db.Connection
+	dbConn  db.Connection
+	isInTrx bool
 }
 
 func NewProductReader(dbConn db.Connection) src.ProductReaderRepo {
 	return &productReader{dbConn: dbConn}
+}
+
+func newProductReaderTx(dbConn db.Connection) src.ProductReaderRepo {
+	return &productReader{dbConn: dbConn, isInTrx: true}
+}
+
+func (p *productReader) GetByIDAndLock(ctx context.Context, productID int) (entity.Product, error) {
+	var res entity.Product
+
+	if !p.isInTrx {
+		return res, stacktrace.NewError("can't lock outside transaction")
+	}
+
+	err := p.dbConn.QueryRow(ctx,
+		`SELECT p.id, p.name, p.initial_price, p.start_bid_date, p.end_bid_date, p.owner_user_id, COALESCE(p.last_bid_id, 0), p.image_url, p.status, p.bid_increment
+			FROM products p
+			WHERE p.id = $1
+			FOR UPDATE`,
+		productID,
+	).Scan(&res.ID, &res.Name, &res.InitialPrice, &res.StartBidDate, &res.EndBidDate, &res.OwnerUserID, &res.LastBidID, &res.ImageURL, &res.Status, &res.BidIncrement)
+	if err != nil {
+		return res, stacktrace.Propagate(err, "[productReader][GetByIDAndLock]")
+	}
+
+	return res, nil
 }
 
 func (p *productReader) GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error) {
@@ -29,7 +55,7 @@ func (p *productReader) GetByIDWithSeller(ctx context.Context, productID int) (e
 	).Scan(&res.ID, &res.Name, &res.InitialPrice, &res.StartBidDate, &res.EndBidDate, &res.OwnerUserID, &res.LastBidID, &res.ImageURL, &res.Status, &res.BidIncrement,
 		&res.Seller.ID, &res.Seller.Email, &res.Seller.Name)
 	if err != nil {
-		return res, stacktrace.Propagate(err, "[ListUserBiddedProducts][bidReader]")
+		return res, stacktrace.Propagate(err, "[productReader][GetByIDWithSeller]")
 	}
 
 	return res, nil
@@ -64,6 +90,6 @@ func (at *productReader) GetProductByOwnerUserID(ctx context.Context, ownerUserI
 	return products, nil
 }
 
-func (at *productReader) WithTx(tx db.Tx) src.ProductReaderRepo {
-	return NewProductReader(tx)
+func (p *productReader) WithTx(tx db.Tx) src.ProductReaderRepo {
+	return newProductReaderTx(tx)
 }

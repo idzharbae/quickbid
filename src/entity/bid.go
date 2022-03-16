@@ -10,15 +10,22 @@ const (
 )
 
 type Bid struct {
-	ID     int
-	UserID int
-	Amount int
-	Status int
+	ID        int
+	ProductID int
+	UserID    int
+	Amount    int
+	Status    int
+	BidTime   time.Time
 }
 
 type BidWithProduct struct {
 	Bid
 	Product Product
+}
+
+type BidWithBidder struct {
+	Bid
+	Bidder User
 }
 
 type BidHistory struct {

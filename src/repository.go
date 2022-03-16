@@ -22,20 +22,56 @@ type AttendanceWriterRepo interface {
 }
 
 type BidReaderRepo interface {
+	GetByUserIDAndProductID(ctx context.Context, userID, productID int) (entity.Bid, error)
 	ListUserBiddedProducts(ctx context.Context, userID int, page int, limit int) ([]entity.BidWithProduct, error)
 
 	WithTx(db.Tx) BidReaderRepo
 }
 
-type ProductWriterRepo interface {
-	InsertProduct(ctx context.Context, product entity.Product) error
+type BidWriterRepo interface {
+	Insert(ctx context.Context, bid entity.Bid) error
+	UpdateAmount(ctx context.Context, bidID, newAmount int) error
+	UpdateStatus(ctx context.Context, bidID, status int) error
 
-	WithTx(db.Tx) ProductWriterRepo
+	WithTx(db.Tx) BidWriterRepo
+}
+
+type BidHistoryReaderRepo interface {
+	GetByID(ctx context.Context, id int) (entity.Bid, error)
+	ListByProductID(ctx context.Context, productID int, page int, limit int) ([]entity.BidWithBidder, error)
+
+	WithTx(db.Tx) BidHistoryReaderRepo
+}
+
+type BidHistoryWriterRepo interface {
+	Insert(ctx context.Context, bid entity.Bid) error
+
+	WithTx(db.Tx) BidHistoryWriterRepo
 }
 
 type ProductReaderRepo interface {
+	GetByIDAndLock(ctx context.Context, productID int) (entity.Product, error)
 	GetByIDWithSeller(ctx context.Context, productID int) (entity.ProductWithSeller, error)
 	GetProductByOwnerUserID(ctx context.Context, ownerUserId int) ([]entity.Product, error)
 
 	WithTx(db.Tx) ProductReaderRepo
+}
+
+type ProductWriterRepo interface {
+	InsertProduct(ctx context.Context, product entity.Product) error
+	UpdateLastBidID(ctx context.Context, productID, lastBidID int) error
+
+	WithTx(db.Tx) ProductWriterRepo
+}
+
+type WalletReaderRepo interface {
+	GetByUserID(ctx context.Context, userID int) (entity.Wallet, error)
+
+	WithTx(db.Tx) WalletReaderRepo
+}
+
+type WalletWriterRepo interface {
+	DeductWallet(ctx context.Context, id, deduction int) error
+
+	WithTx(db.Tx) WalletWriterRepo
 }
